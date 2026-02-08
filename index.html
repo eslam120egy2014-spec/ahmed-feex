@@ -2,209 +2,235 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FedEx | Ahmed Pro V20</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FedEx Elite V49</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --fedex-purple: #4D148C; --fedex-orange: #FF6200; }
-        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
-        .fedex-purple { background-color: var(--fedex-purple); }
-        .screen { display: none; }
-        .screen.active { display: block; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        body { font-family: 'Cairo', sans-serif; background-color: #F4F7FE; padding-bottom: 110px; margin: 0; overflow-x: hidden; }
         
-        /* ألوان الكروت حسب الحالة */
-        .day-card { border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; border-right: 8px solid; }
-        .card-green { background: #f0fdf4; border-right-color: #22c55e; } /* يوم شغل صافي */
-        .card-orange { background: #fff7ed; border-right-color: var(--fedex-orange); } /* يوم فيه سحوبات */
-        
-        #exportArea { position: fixed; left: -9999px; top: 0; width: 400px; background: white; padding: 25px; }
+        /* الدخلة السينمائية */
+        #splash {
+            position: fixed; inset: 0; background: #ffffff;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: all 0.8s cubic-bezier(0.9, 0, 0.1, 1);
+        }
+        .splash-logo { 
+            font-size: 70px; font-weight: 900; font-style: italic; letter-spacing: -4px;
+            transform: scale(0); animation: logoPop 1s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards;
+        }
+        .welcome-text {
+            margin-top: 30px; font-size: 22px; font-weight: 900; color: var(--fedex-purple);
+            opacity: 0; transform: translateY(20px);
+            animation: textSlideUp 0.8s ease-out forwards 0.8s;
+            position: relative;
+        }
+        .welcome-text::after {
+            content: ''; position: absolute; bottom: -5px; right: 0; width: 0; height: 3px;
+            background: var(--fedex-orange); animation: lineGrow 0.6s ease-out forwards 1.4s;
+        }
+        @keyframes logoPop { 0% { transform: scale(0); filter: blur(10px); } 70% { transform: scale(1.2); filter: blur(0); } 100% { transform: scale(1); } }
+        @keyframes textSlideUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes lineGrow { to { width: 100%; } }
+        .fade-out-up { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+
+        /* زرار + الجديد والمطور */
+        .add-btn-main {
+            width: 75px; height: 75px;
+            background: linear-gradient(135deg, var(--fedex-purple) 0%, #320d5c 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            border: 5px solid #F4F7FE;
+            transform: translateY(-32px);
+            box-shadow: 0 10px 25px rgba(77, 20, 140, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .add-btn-main:active { transform: translateY(-32px) scale(0.8) rotate(90deg); }
+        .add-btn-main svg { width: 35px; height: 35px; stroke-width: 3; }
+
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(77, 20, 140, 0.08); }
+        .purple-gradient { background: linear-gradient(135deg, #4D148C 0%, #2E0B54 100%); border-radius: 30px; }
+        .screen { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #renderArea { width: 500px; background: white; padding: 40px; position: fixed; left: -9999px; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: white; display: flex; align-items: center; z-index: 1000; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen pb-28">
+<body>
 
-    <header class="p-5 flex justify-between items-center bg-white shadow-sm sticky top-0 z-50">
-        <div class="text-2xl font-black italic"><span style="color:var(--fedex-purple)">Fed</span><span style="color:var(--fedex-orange)">Ex</span></div>
-        <button onclick="archiveMonth()" class="text-[10px] bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold">تقفيل الشهر 🏁</button>
+    <div id="splash">
+        <div class="splash-logo">
+            <span style="color:var(--fedex-purple)">Fed</span><span style="color:var(--fedex-orange)">Ex</span>
+        </div>
+        <div class="welcome-text">مرحباً، أحمد وليد</div>
+    </div>
+
+    <header class="p-6 flex justify-between items-center bg-white card-shadow mb-4">
+        <div class="text-3xl font-black italic tracking-tighter">
+            <span style="color:var(--fedex-purple)">Fed</span><span style="color:var(--fedex-orange)">Ex</span>
+        </div>
+        <div class="px-4 py-2 rounded-2xl bg-purple-50 text-purple-900 font-black text-[11px] italic">AHMED WALID</div>
     </header>
 
-    <main class="p-5">
-        <section id="home" class="screen active text-center">
-            <div class="bg-[#4D148C] p-8 rounded-[2.5rem] text-white shadow-2xl mb-8">
-                <p class="text-purple-200 text-xs mb-1 font-bold">صافي مستحقاتك (بدون خصم البنزين)</p>
-                <h2 id="netBalance" class="text-5xl font-black">€0.00</h2>
-                <div id="archiveSum" class="hidden mt-4 text-[10px] bg-black/20 p-2 rounded-lg"></div>
+    <main>
+        <section id="home" class="screen active">
+            <div class="purple-gradient p-8 text-white shadow-2xl mb-6 text-center">
+                <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-1 text-orange-200">الرصيد عند الشركة</p>
+                <h2 id="atCompany" class="text-5xl font-black italic mb-6">€0.00</h2>
+                <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-5">
+                    <div>
+                        <p class="text-[10px] opacity-50 uppercase font-bold">إجمالي الطرود</p>
+                        <p id="sumEarn" class="font-black text-xl">0€</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] opacity-50 uppercase font-bold text-orange-400">إجمالي السحب</p>
+                        <p id="sumWith" class="font-black text-xl text-orange-400">0€</p>
+                    </div>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                    <p class="text-[10px] text-gray-400 font-bold mb-1">إجمالي الطرود</p>
-                    <p id="totalParcels" class="text-2xl font-black">0</p>
-                </div>
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                    <p class="text-[10px] text-gray-400 font-bold mb-1 text-orange-600">المسحوبات الشخصية</p>
-                    <p id="totalWithdrawn" class="text-2xl font-black">0€</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="add" class="screen">
-            <div class="space-y-4">
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border-t-8 border-purple-800">
-                    <h4 class="font-black text-purple mb-4">تسجيل طرود التوصيل</h4>
-                    <input type="number" id="pInput" placeholder="0" class="w-full bg-gray-50 p-4 rounded-2xl mb-4 text-center font-black text-3xl outline-none">
-                    <button onclick="saveEntry('delivery')" class="w-full fedex-purple text-white p-4 rounded-2xl font-bold">حفظ الشحنات</button>
-                </div>
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border-t-8 border-orange-500">
-                    <h4 class="font-black text-orange-600 mb-4">سحب فلوس (تحت الحساب)</h4>
-                    <input type="number" id="wInput" placeholder="€ 0.00" class="w-full bg-gray-50 p-4 rounded-2xl mb-4 text-center font-black text-3xl outline-none">
-                    <button onclick="saveEntry('withdraw')" class="w-full bg-[#FF6200] text-white p-4 rounded-2xl font-bold">تأكيد السحب</button>
-                </div>
+            <div class="bg-white p-6 rounded-[25px] card-shadow border-r-[10px] border-emerald-500 flex justify-between items-center">
+                <span class="text-xs font-black text-slate-400 uppercase">الربح الصافي (كاش الجيب)</span>
+                <span id="netProfit" class="text-2xl font-black text-emerald-600">0€</span>
             </div>
         </section>
 
         <section id="history" class="screen">
-            <div class="bg-white p-5 rounded-3xl mb-6 shadow-sm border border-gray-100">
-                <h4 class="font-black text-[10px] text-gray-400 mb-4">تصدير كشف الحساب صورة</h4>
-                <div class="flex gap-2 mb-4">
-                    <input type="date" id="dFrom" class="flex-1 bg-gray-50 p-2 rounded-xl text-xs border">
-                    <input type="date" id="dTo" class="flex-1 bg-gray-50 p-2 rounded-xl text-xs border">
+            <div class="bg-white p-6 rounded-[30px] card-shadow mb-6 border border-slate-50">
+                <h4 class="text-center font-black text-slate-700 mb-4 text-xs italic">استخراج فاتورة فترة</h4>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <input type="date" id="dateFrom" class="p-3 bg-slate-50 rounded-xl text-xs font-bold border-none outline-none">
+                    <input type="date" id="dateTo" class="p-3 bg-slate-50 rounded-xl text-xs font-bold border-none outline-none">
                 </div>
-                <button onclick="exportImage()" class="w-full bg-green-600 text-white p-3 rounded-xl text-xs font-bold">تحميل الصورة 📸</button>
+                <button onclick="exportCustomReport()" class="w-full py-4 bg-purple-900 text-white rounded-2xl font-black text-xs italic uppercase shadow-lg active:scale-95 transition">تحميل التقرير 📸</button>
             </div>
-            
-            <div id="historyList" class="space-y-4"></div>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-black text-slate-800 italic uppercase">Log</h3>
+                <button onclick="clearCurrentMonth()" class="text-[10px] font-black text-red-400">Clear Month</button>
+            </div>
+            <div id="logContainer" class="space-y-3"></div>
+        </section>
+
+        <section id="add" class="screen">
+            <div class="bg-white p-8 rounded-[40px] card-shadow">
+                <div class="flex bg-slate-100 p-2 rounded-2xl mb-8">
+                    <button id="mD" onclick="setM('d')" class="flex-1 py-4 rounded-xl font-black text-xs bg-white text-purple-900 shadow-sm">📦 طرود</button>
+                    <button id="mW" onclick="setM('w')" class="flex-1 py-4 rounded-xl font-black text-xs text-slate-400">💸 سحب</button>
+                </div>
+                <input type="date" id="iDate" class="w-full mb-6 p-4 rounded-xl bg-slate-50 font-bold outline-none">
+                <input type="number" id="iVal" placeholder="0" class="w-full mb-8 p-10 rounded-3xl bg-slate-50 text-center font-black text-6xl outline-none border-2 border-transparent focus:border-purple-200">
+                <button onclick="save()" class="w-full py-6 rounded-3xl bg-[#4D148C] text-white font-black text-xl shadow-xl">حفظ الآن</button>
+            </div>
         </section>
     </main>
 
-    <div id="exportArea">
-        <h1 style="color:#4D148C; text-align:center; margin:0; font-size:24px;">FedEx Statement</h1>
-        <p id="exportDates" style="text-align:center; font-size:10px; color:#666;"></p>
-        <div id="exportContent" style="margin:20px 0;"></div>
-        <div style="background:#4D148C; color:white; padding:15px; border-radius:10px; text-align:center;">
-            <p style="margin:0; font-size:10px;">الصافي النهائي</p>
-            <h2 id="exportTotal" style="margin:0; font-size:24px;"></h2>
+    <div id="renderArea">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:6px solid #FF6200; padding-bottom:20px; margin-bottom:30px;">
+            <div style="font-size:45px; font-weight:900; font-style:italic;"><span style="color:#4D148C">Fed</span><span style="color:#FF6200">Ex</span></div>
+            <div style="text-align:right;">
+                <div style="font-weight:900; font-size:20px; color:#4D148C;">AHMED WALID</div>
+                <div id="repPeriod" style="font-size:12px; font-weight:bold; color:#888;"></div>
+            </div>
         </div>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+            <thead>
+                <tr style="background:#F4F7FE; text-align:right;">
+                    <th style="padding:15px; border-bottom:2px solid #ddd;">التاريخ</th>
+                    <th style="padding:15px; border-bottom:2px solid #ddd;">الطرود</th>
+                    <th style="padding:15px; border-bottom:2px solid #ddd;">الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody id="repBody" style="font-weight:bold;"></tbody>
+        </table>
+        <div id="repFooter" style="background:#4D148C; color:white; padding:35px; border-radius:30px; display:flex; justify-content:space-between; align-items:center;"></div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-50 max-w-md mx-auto shadow-2xl">
-        <button onclick="showScreen('home')" class="nav-btn p-2 text-purple flex flex-col items-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            <span class="text-[10px] font-bold">الرئيسية</span>
-        </button>
-        <button onclick="showScreen('add')" class="-mt-10 fedex-purple text-white p-5 rounded-full shadow-2xl border-4 border-white">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        </button>
-        <button onclick="showScreen('history')" class="nav-btn p-2 text-gray-300 flex flex-col items-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-            <span class="text-[10px] font-bold">النتيجة</span>
-        </button>
+    <nav class="nav-bar">
+        <div onclick="tab('home')" class="flex-1 flex flex-col items-center text-slate-300"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></div>
+        <div onclick="tab('add')" class="add-btn-main">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v12m6-6H6"></path></svg>
+        </div>
+        <div onclick="tab('history')" class="flex-1 flex flex-col items-center text-slate-300"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
     </nav>
 
     <script>
-        const PRICE = 3.8;
-        const GAS_COST = 35; // مصروف البنزين الافتراضي للعرض فقط
-        let db = JSON.parse(localStorage.getItem('fedex_v20')) || { logs: [], archive: 0 };
+        const P = 3.8, G = 35;
+        let db = JSON.parse(localStorage.getItem('fedex_final_v49')) || { logs: [] };
+        let mode = 'd';
 
-        function showScreen(id) {
+        window.onload = () => {
+            setTimeout(() => document.getElementById('splash').classList.add('fade-out-up'), 2800);
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateFrom').value = today; document.getElementById('dateTo').value = today;
+            document.getElementById('iDate').value = today;
+            calc();
+        };
+
+        function tab(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'history') renderHistory();
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-purple', 'text-gray-300'));
-            if(event) event.currentTarget.classList.replace('text-gray-300', 'text-purple');
+            if(id === 'home') calc(); else if(id === 'history') hist();
         }
 
-        function saveEntry(type) {
-            const date = new Date().toISOString().split('T')[0];
-            let val = 0, label = '';
-            if(type === 'delivery') {
-                const c = parseInt(document.getElementById('pInput').value); if(!c) return;
-                val = c * PRICE; label = توصيل ${c} طرد;
-            } else {
-                const a = parseFloat(document.getElementById('wInput').value); if(!a) return;
-                val = -a; label = سحب شخصي;
-            }
-            db.logs.unshift({ id: Date.now(), date, val, label, type });
-            save();
-            document.getElementById('pInput').value = ''; document.getElementById('wInput').value = '';
-            showScreen('home');
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = '';
-            const groups = db.logs.reduce((acc, l) => {
-                acc[l.date] = acc[l.date] || { earn: 0, withdraw: 0, net: 0 };
-                if(l.val > 0) acc[l.date].earn += l.val; else acc[l.date].withdraw += Math.abs(l.val);
-                acc[l.date].net += l.val; return acc;
-            }, {});
-
-            Object.keys(groups).sort().reverse().forEach(date => {
-                const g = groups[date];
-                const netAfterGas = g.earn - GAS_COST;
-                const isWithdraw = g.withdraw > 0;
-                
-                list.innerHTML += 
-                    <div class="day-card ${isWithdraw ? 'card-orange' : 'card-green'}">
-                        <div class="flex justify-between items-center mb-3 border-b border-black/5 pb-2">
-                            <span class="font-black text-sm text-purple">${date}</span>
-                            <span class="bg-purple-800 text-white px-3 py-1 rounded-full text-[10px] font-bold">صافي الرصيد: ${g.net.toFixed(1)}€</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                            <div class="text-green-600">المكسب: ${g.earn.toFixed(1)}€</div>
-                            <div class="text-red-500">المسحوبات: ${g.withdraw.toFixed(1)}€</div>
-                            <div class="text-gray-400 italic">مصروف بنزين: ${GAS_COST}€</div>
-                            <div class="text-blue-600 underline">بعد البنزين: ${netAfterGas.toFixed(1)}€</div>
-                        </div>
-                    </div>;
-            });
-        }
-
-        function exportImage() {
-            const from = document.getElementById('dFrom').value;
-            const to = document.getElementById('dTo').value;
-            if(!from || !to) return alert('حدد التاريخ');
-            const filtered = db.logs.filter(l => l.date >= from && l.date <= to);
-            let total = 0;
-            const content = document.getElementById('exportContent');
-            content.innerHTML = '';
-            filtered.forEach(l => { total += l.val; content.innerHTML += <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee; font-size:12px;"><span>${l.date}</span><span>${l.label}</span><span>${l.val.toFixed(1)}€</span></div>; });
-            document.getElementById('exportDates').innerText = من ${from} إلى ${to};
-            document.getElementById('exportTotal').innerText = total.toFixed(2) + ' €';
-            html2canvas(document.querySelector("#exportArea")).then(canvas => {
-                const link = document.createElement('a');
-                link.download = FedEx_Report.png;
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
-
-        function archiveMonth() {
-            if(confirm('تقفيل الشهر هيصفر الرصيد ويحفظه؟')) {
-                db.archive += db.logs.reduce((a, b) => a + b.val, 0);
-                db.logs = []; save();
-            }
+        function setM(m) {
+            mode = m;
+            document.getElementById('mD').className = m==='d' ? 'flex-1 py-4 rounded-xl font-black text-xs bg-white text-purple-900 shadow-sm' : 'flex-1 py-4 rounded-xl font-black text-xs text-slate-400';
+            document.getElementById('mW').className = m==='w' ? 'flex-1 py-4 rounded-xl font-black text-xs bg-white text-orange-600 shadow-sm' : 'flex-1 py-4 rounded-xl font-black text-xs text-slate-400';
         }
 
         function save() {
-            localStorage.setItem('fedex_v20', JSON.stringify(db));
-            updateUI();
+            const d = document.getElementById('iDate').value, v = parseFloat(document.getElementById('iVal').value) || 0;
+            if(!v) return;
+            db.logs.unshift({ id: Date.now(), d, v: mode==='d' ? v*P : -v, p: mode==='d' ? v : 0, t: mode });
+            localStorage.setItem('fedex_final_v49', JSON.stringify(db));
+            document.getElementById('iVal').value = '';
+            tab('home');
         }
 
-        function updateUI() {
-            let net = db.logs.reduce((a, b) => a + b.val, 0);
-            let p = db.logs.filter(l => l.type === 'delivery').reduce((a, b) => a + (b.val/PRICE), 0);
-            let w = db.logs.filter(l => l.val < 0).reduce((a, b) => a + Math.abs(b.val), 0);
-            document.getElementById('netBalance').innerText = €${net.toFixed(2)};
-            document.getElementById('totalParcels').innerText = Math.round(p);
-            document.getElementById('totalWithdrawn').innerText = w.toFixed(1) + '€';
-            if(db.archive !== 0) {
-                document.getElementById('archiveSum').innerText = إجمالي الأرشيف السابق: €${db.archive.toFixed(2)};
-                document.getElementById('archiveSum').classList.remove('hidden');
-            }
+        function calc() {
+            const total = db.logs.reduce((a, b) => a + b.v, 0);
+            const workDays = [...new Set(db.logs.filter(l => l.t === 'd').map(l => l.d))].length;
+            document.getElementById('atCompany').innerText = €${total.toFixed(2)};
+            document.getElementById('sumEarn').innerText = ${db.logs.filter(l => l.t === 'd').reduce((a, b) => a + b.v, 0).toFixed(1)}€;
+            document.getElementById('sumWith').innerText = ${Math.abs(db.logs.filter(l => l.t === 'w').reduce((a, b) => a + b.v, 0)).toFixed(1)}€;
+            document.getElementById('netProfit').innerText = €${(total - (workDays * G)).toFixed(2)};
         }
-        updateUI();
+
+        function hist() {
+            const cont = document.getElementById('logContainer'); cont.innerHTML = '';
+            db.logs.forEach(l => {
+                cont.innerHTML += <div class="bg-white p-5 rounded-2xl flex justify-between items-center card-shadow border border-slate-50"><div><p class="text-[10px] font-bold text-slate-400">${l.d}</p><p class="font-black">${l.t==='d'?'📦 '+l.p+' طرد':'💸 سحب'}</p></div><div class="flex items-center gap-4"><span class="font-black ${l.v>0?'text-purple-900':'text-orange-600'}">€${Math.abs(l.v).toFixed(1)}</span><button onclick="del(${l.id})" class="text-red-200">🗑️</button></div></div>;
+            });
+        }
+
+        function exportCustomReport() {
+            const from = document.getElementById('dateFrom').value, to = document.getElementById('dateTo').value;
+            const filtered = db.logs.filter(l => l.d >= from && l.d <= to && l.t === 'd').sort((a,b) => new Date(a.d) - new Date(b.d));
+            if(!filtered.length) return alert('لا يوجد بيانات');
+            document.getElementById('repPeriod').innerText = Period: ${from} to ${to};
+            const body = document.getElementById('repBody'); body.innerHTML = '';
+            let tP = 0, tV = 0;
+            filtered.forEach(l => {
+                tP += l.p; tV += l.v;
+                body.innerHTML += <tr style="border-bottom:1px solid #eee;"><td style="padding:15px;">${l.d}</td><td style="padding:15px;">${l.p}</td><td style="padding:15px;">€${l.v.toFixed(1)}</td></tr>;
+            });
+            document.getElementById('repFooter').innerHTML = <div><p style="font-size:12px;">PARCELS</p><h3 style="margin:0; font-size:24px;">${tP}</h3></div><div><p style="font-size:12px;">TOTAL</p><h3 style="margin:0; font-size:24px;">€${tV.toFixed(2)}</h3></div>;
+            html2canvas(document.getElementById('renderArea')).then(canvas => {
+                const link = document.createElement('a'); link.download = FedEx_Invoice.png;
+                link.href = canvas.toDataURL(); link.click();
+            });
+        }
+
+        function del(id) { if(confirm('حذف؟')) { db.logs = db.logs.filter(l => l.id !== id); localStorage.setItem('fedex_final_v49', JSON.stringify(db)); hist(); calc(); } }
+        function clearCurrentMonth() {
+            const m = new Date().toISOString().slice(0, 7);
+            if(confirm('مسح بيانات الشهر الحالي؟')) { db.logs = db.logs.filter(l => !l.d.startsWith(m)); localStorage.setItem('fedex_final_v49', JSON.stringify(db)); hist(); calc(); }
+        }
     </script>
 </body>
 </html>
